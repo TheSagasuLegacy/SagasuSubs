@@ -4,9 +4,15 @@ version = "0.1.0"
 description = "Subtitle processing scripts collection for project Sagasu."
 authors = ["Mix <32300164+mnixry@users.noreply.github.com>"]
 license = "GPL-3.0"
+packages = [
+    { include = "SagasuSubs" },
+]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+pydantic = "^1.8.2"
+pysubs2 = "^1.2.0"
+cchardet = "^2.1.7"
 
 [tool.poetry.dev-dependencies]
 jupyter = "^1.0.0"
@@ -14,6 +20,9 @@ tqdm = "^4.61.2"
 requests = "^2.25.1"
 pysubs2 = "^1.2.0"
 cchardet = "^2.1.7"
+mypy = "^0.910"
+black = "^21.6b0"
+flake8 = "^3.9.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
