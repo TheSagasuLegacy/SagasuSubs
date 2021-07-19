@@ -62,6 +62,15 @@ class FileCrud(CrudBase):
             entity = session.query(entities.File).get(id)
             return dto.FileRead.from_orm(entity) if entity else None
 
+    def iterate(self, begin: int = 0):
+        session = self.session_factory()
+        with session.begin():
+            for entity in session.query(entities.File).filter(
+                entities.File.id >= begin
+            ):
+                yield dto.FileRead.from_orm(entity)
+        return
+
     def read_by_sha1(self, sha1: str) -> Optional[dto.FileRead]:
         session = self.session_factory()
         with session.begin():
@@ -73,7 +82,7 @@ class FileCrud(CrudBase):
     def update(self, model: dto.FileRead) -> dto.FileRead:
         session = self.session_factory()
         with session.begin():
-            entity = entities.File(**model.dict())
+            entity = entities.File(**model.dict(exclude={"dialogs"}))
             session.merge(entity)
             session.commit()
             session.flush()
@@ -89,6 +98,14 @@ class FileCrud(CrudBase):
             session.commit()
             session.flush()
         return
+
+    def __iter__(self):
+        return self.iterate()
+
+    def __len__(self):
+        session = self.session_factory()
+        with session.begin():
+            return session.query(entities.File).count()
 
 
 class DialogCrud(CrudBase):
