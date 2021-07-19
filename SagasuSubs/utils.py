@@ -10,11 +10,7 @@ def sha1sum(file: Path) -> str:
     """
     Calculate the sha1 hash of a file.
     """
-    sha1 = hashlib.sha1()
-    with file.open("rb") as f:
-        for chunk in iter(lambda: f.read(128 * sha1.block_size), b""):
-            sha1.update(chunk)
-    return sha1.hexdigest()
+    return hashlib.sha1(file.read_bytes()).hexdigest()
 
 
 def detect_encoding(file: Path) -> Optional[str]:
@@ -25,13 +21,13 @@ def detect_encoding(file: Path) -> Optional[str]:
         return cchardet.detect(f.read())["encoding"]
 
 
-def iterate_files(directory: Path, ext: str) -> Iterator[Path]:
+def iterate_files(directory: Path, ext: str = None) -> Iterator[Path]:
     """
     Walk path and return file paths with specified extension name.
     """
     for dir, folders, files in os.walk(directory):
         for file in files:
-            if not file.endswith(ext):
+            if ext and not file.endswith(ext):
                 continue
             yield Path(dir) / file
     return
