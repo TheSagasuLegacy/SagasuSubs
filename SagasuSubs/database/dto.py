@@ -30,7 +30,7 @@ class FileCreate(DtoModel):
     episode_id: Optional[int] = None
 
 
-class FileRead(DtoModel):
+class FileRead(FileCreate):
     id: int
     dialogs: List[DialogRead]
 

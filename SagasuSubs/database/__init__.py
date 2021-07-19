@@ -62,6 +62,14 @@ class FileCrud(CrudBase):
             entity = session.query(entities.File).get(id)
             return dto.FileRead.from_orm(entity) if entity else None
 
+    def read_by_sha1(self, sha1: str) -> Optional[dto.FileRead]:
+        session = self.session_factory()
+        with session.begin():
+            entity = (
+                session.query(entities.File).filter(entities.File.sha1 == sha1).first()
+            )
+            return dto.FileRead.from_orm(entity) if entity else None
+
     def update(self, model: dto.FileRead) -> dto.FileRead:
         session = self.session_factory()
         with session.begin():
