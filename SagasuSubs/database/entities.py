@@ -1,5 +1,3 @@
-from typing import Type
-
 from sqlalchemy import Column, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.decl_api import declarative_base
