@@ -43,7 +43,7 @@ class EpisodeCreate(DtoModel):
     series_id: int
 
 
-class EpisodeRead(DtoModel):
+class EpisodeRead(EpisodeCreate):
     pass
 
 
@@ -52,5 +52,5 @@ class SeriesCreate(DtoModel):
     name: str
 
 
-class SeriesRead(DtoModel):
+class SeriesRead(SeriesCreate):
     episodes: List[EpisodeRead]
