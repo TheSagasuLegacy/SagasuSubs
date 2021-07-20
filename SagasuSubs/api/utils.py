@@ -27,7 +27,7 @@ class NotebookAPIUtils:
 
     @lru_cache(maxsize=16)
     def episodes(self, series_id: int) -> List[dto.EpisodeCreate]:
-        response = self.client.get(f"api/series/{series_id}")
+        response = self.client.get(f"/api/series/{series_id}")
         response.raise_for_status()
         data = response.json()
         return [
