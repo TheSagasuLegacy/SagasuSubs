@@ -8,6 +8,9 @@ packages = [
     { include = "SagasuSubs" },
 ]
 
+[tool.poetry.scripts]
+SagasuSubs = 'SagasuSubs.api.__main__:main'
+
 [tool.poetry.dependencies]
 python = "^3.8"
 pydantic = "^1.8.2"
@@ -15,6 +18,8 @@ pysubs2 = "^1.2.0"
 cchardet = "^2.1.7"
 SQLAlchemy = "^1.4.21"
 httpx = {extras = ["http2"], version = "^0.18.2"}
+click = "^8.0.1"
+loguru = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 jupyter = "^1.0.0"
