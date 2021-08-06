@@ -1,8 +1,7 @@
+import asyncio
 from pathlib import Path
 
 import click
-
-import asyncio
 
 
 @click.command()
@@ -27,10 +26,18 @@ import asyncio
     show_default=True,
 )
 @click.option("-e", "--end", default=0, type=int, help="End index in database")
-def main(base: str, database: Path, parallel: int, begin: int, end: int):
+@click.option(
+    "-s",
+    "--slice",
+    default=400,
+    type=int,
+    show_default=True,
+    help="End index in database",
+)
+def main(base: str, database: Path, parallel: int, begin: int, end: int, slice: int):
     from SagasuSubs.api import UploadFiles
 
-    instance = UploadFiles(database, base)
+    instance = UploadFiles(database, base, slice)
     asyncio.run(
         instance.run(
             begin,

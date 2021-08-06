@@ -23,6 +23,7 @@ class DialogRead(DialogBase):
 class FileBase(BaseModel):
     filename: str
     sha1: str
+    remark: Optional[str] = None
 
 
 class FileCreate(FileBase):
