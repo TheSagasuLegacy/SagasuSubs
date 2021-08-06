@@ -42,7 +42,6 @@ class SubtitlePersist(SubtitleFile):
         file: Path,
         format: str = None,
         exclude_fx: bool = False,
-        min_length: int = 3,
     ) -> "SubtitlePersist":
         data, sha1 = auto_load(file), sha1sum(file)
         subtitle = SSAFile.from_string(data, format)
@@ -50,14 +49,11 @@ class SubtitlePersist(SubtitleFile):
         for dialog in subtitle.events:
             if dialog.type != "Dialogue":
                 continue
-            content = (
-                (FX_REGEX.sub("", dialog.text) if exclude_fx else dialog.text)
-                .strip()
-                .replace(r"\\N", "\n")
-                .replace(r"\\R", "\r")
-            )
-            if len(content) < min_length:
+            if exclude_fx and dialog.effect.strip():
                 continue
+            if exclude_fx and FX_REGEX.search(dialog.text):
+                continue
+            content = dialog.text.strip().replace("\\N", "\n").replace("\\R", "\r")
             result.dialogs.append(
                 DialogContent(
                     content=content,
