@@ -1,3 +1,6 @@
+# Authenticate credentials
+auth.txt
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
