@@ -11,7 +11,7 @@ class DialogBase(BaseModel):
 
 
 class DialogCreate(DialogBase):
-    file: str
+    file_id: str
 
 
 class DialogRead(DialogBase):
@@ -27,8 +27,8 @@ class FileBase(BaseModel):
 
 
 class FileCreate(FileBase):
-    series: int
-    episode: Optional[int] = None
+    series_id: int
+    episode_id: Optional[int] = None
 
 
 class FileRead(FileBase):

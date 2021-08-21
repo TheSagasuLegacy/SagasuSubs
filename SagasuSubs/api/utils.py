@@ -4,10 +4,16 @@ from typing import List, Optional
 import httpx
 from SagasuSubs.database import dto
 
+from .auth import AuthTokenManager
+
 
 class NotebookAPIUtils:
     def __init__(self, base: str):
-        self.client = httpx.Client(http2=True, base_url=base)
+        self.client = httpx.Client(
+            http2=True,
+            base_url=base,
+            headers={"Authorization": "Bearer " + AuthTokenManager.get_token()},
+        )
 
     @lru_cache(maxsize=16)
     def search(self, keyword: str) -> Optional[dto.SeriesCreate]:

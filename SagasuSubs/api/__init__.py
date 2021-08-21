@@ -6,13 +6,19 @@ import httpx
 import SagasuSubs.database as database
 from loguru import logger
 from SagasuSubs.database import dto
+from SagasuSubs.utils import AdvanceSemaphore
 
 from . import models
+from .auth import AuthTokenManager
 
 
 class UploadFiles:
     def __init__(self, db_path: Path, base: str, upload_slice: int = 400):
-        self.client = httpx.AsyncClient(base_url=base, http2=True)
+        self.client = httpx.AsyncClient(
+            http2=True,
+            base_url=base,
+            headers={"Authorization": "Bearer " + AuthTokenManager.get_token()},
+        )
         self.file_crud = database.FileCrud(db_path)
         self.dialog_crud = database.DialogCrud(db_path)
         self.upload_slice = upload_slice
@@ -32,7 +38,7 @@ class UploadFiles:
         model = models.FileCreate(
             filename=file.filename,
             sha1=file.sha1,
-            series=file.series_id,
+            series_id=file.series_id,
             remark=file.path,
         )
         response = await self.client.post("/api/files", json=model.dict())
@@ -45,7 +51,10 @@ class UploadFiles:
     ) -> List[models.DialogRead]:
         bulk_data = [
             models.DialogCreate(
-                file=file_id, content=dialog.content, begin=dialog.begin, end=dialog.end
+                file_id=file_id,
+                content=dialog.content,
+                begin=dialog.begin,
+                end=dialog.end,
             ).dict()
             for dialog in dialogs
         ]
@@ -77,9 +86,12 @@ class UploadFiles:
             logger.exception(f"Exception {e} occurred during processing file:")
 
     async def run(self, begin: int = 0, end: int = 0, parallel: int = 2):
-        sem = asyncio.Semaphore(parallel)
+        sem = AdvanceSemaphore(parallel)
 
         for file in self.file_crud.iterate(begin, end):
             await sem.acquire()
             task = asyncio.create_task(self.upload_subtitles(file))
             task.add_done_callback(lambda _: sem.release())
+
+        await sem.wait_all_finish()
+        await self.client.aclose()

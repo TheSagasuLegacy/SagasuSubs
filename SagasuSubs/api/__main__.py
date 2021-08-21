@@ -1,7 +1,10 @@
 import asyncio
 from pathlib import Path
+from typing import Optional
 
 import click
+
+from .auth import AuthTokenManager
 
 
 @click.command()
@@ -15,6 +18,14 @@ import click
     default=2,
     type=int,
     help="Number of concurrents.",
+    show_default=True,
+)
+@click.option(
+    "-t",
+    "--token",
+    default=None,
+    type=str,
+    help="HTTP JSON web token, support file path or token",
     show_default=True,
 )
 @click.option(
@@ -34,7 +45,21 @@ import click
     show_default=True,
     help="End index in database",
 )
-def main(base: str, database: Path, parallel: int, begin: int, end: int, slice: int):
+def main(
+    base: str,
+    database: Path,
+    token: Optional[str],
+    parallel: int,
+    begin: int,
+    end: int,
+    slice: int,
+):
+    if token is not None:
+        if (auth_file := Path(token)).is_file():
+            AuthTokenManager.load_file(auth_file)
+        else:
+            AuthTokenManager.set_token(token)
+
     from SagasuSubs.api import UploadFiles
 
     instance = UploadFiles(database, base, slice)
