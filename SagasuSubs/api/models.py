@@ -8,6 +8,7 @@ class DialogBase(BaseModel):
     content: str
     begin: int
     end: int
+    user_id: int
 
 
 class DialogCreate(DialogBase):
@@ -24,6 +25,7 @@ class FileBase(BaseModel):
     filename: str
     sha1: str
     remark: Optional[str] = None
+    user_id: int
 
 
 class FileCreate(FileBase):

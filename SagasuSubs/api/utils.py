@@ -9,10 +9,11 @@ from .auth import AuthTokenManager
 
 class NotebookAPIUtils:
     def __init__(self, base: str):
+        self.auth_info = AuthTokenManager.get_token()
         self.client = httpx.Client(
             http2=True,
             base_url=base,
-            headers={"Authorization": "Bearer " + AuthTokenManager.get_token()},
+            headers={"Authorization": "Bearer " + self.auth_info.token},
         )
 
     @lru_cache(maxsize=16)

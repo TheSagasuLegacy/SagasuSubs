@@ -14,10 +14,11 @@ from .auth import AuthTokenManager
 
 class UploadFiles:
     def __init__(self, db_path: Path, base: str, upload_slice: int = 400):
+        self.auth_data = AuthTokenManager.get_token()
         self.client = httpx.AsyncClient(
             http2=True,
             base_url=base,
-            headers={"Authorization": "Bearer " + AuthTokenManager.get_token()},
+            headers={"Authorization": "Bearer " + self.auth_data.token},
         )
         self.file_crud = database.FileCrud(db_path)
         self.dialog_crud = database.DialogCrud(db_path)
@@ -40,6 +41,7 @@ class UploadFiles:
             sha1=file.sha1,
             series_id=file.series_id,
             remark=file.path,
+            user_id=self.auth_data.id,
         )
         response = await self.client.post("/api/files", json=model.dict())
         response.raise_for_status()
@@ -55,6 +57,7 @@ class UploadFiles:
                 content=dialog.content,
                 begin=dialog.begin,
                 end=dialog.end,
+                user_id=self.auth_data.id,
             ).dict()
             for dialog in dialogs
         ]
@@ -79,11 +82,20 @@ class UploadFiles:
         try:
             if await self.get_file(file.sha1):
                 return
-            file_response = await self.upload_file(file)
-            dialog_response = await self.upload_dialogs(file_response.id, file.dialogs)
-            return dialog_response
+            try:
+                file_response = await self.upload_file(file)
+                dialog_response = await self.upload_dialogs(
+                    file_response.id, file.dialogs
+                )
+                return dialog_response
+            except httpx.HTTPStatusError as e:
+                response: httpx.Response = e.response
+                logger.error(
+                    f"Server respond {response.status_code}, data={response.json()}"
+                )
         except Exception as e:
             logger.exception(f"Exception {e} occurred during processing file:")
+            raise
 
     async def run(self, begin: int = 0, end: int = 0, parallel: int = 2):
         sem = AdvanceSemaphore(parallel)
