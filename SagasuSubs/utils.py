@@ -1,6 +1,6 @@
 import hashlib
 import os
-from asyncio import Future, Semaphore
+from asyncio import AbstractEventLoop, Semaphore, wait_for
 from pathlib import Path
 from typing import Iterator, Optional
 
@@ -8,22 +8,28 @@ import cchardet
 
 
 class AdvanceSemaphore(Semaphore):
+    _loop: AbstractEventLoop
+
     def __init__(self, value: int) -> None:
         super().__init__(value=value)
         self._initial_value = value
-        self._finshed_future: Future[None] = Future()
+        self._finshed_future = self._loop.create_future()
 
     def _check_value(self) -> None:
-        if (self._value >= self._initial_value) and (not self._waiters):
+        if (
+            (self._value >= self._initial_value)
+            and (not self._waiters)
+            and (not self._finshed_future.done())
+        ):
             self._finshed_future.set_result(None)
 
     def release(self) -> None:
         super().release()
         self._check_value()
 
-    async def wait_all_finish(self):
+    async def wait_all_finish(self, timeout: float = None):
         self._check_value()
-        await self._finshed_future
+        await wait_for(self._finshed_future, timeout)
 
 
 def sha1sum(file: Path) -> str:
