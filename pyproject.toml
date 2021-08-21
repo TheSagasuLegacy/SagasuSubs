@@ -20,6 +20,7 @@ SQLAlchemy = "^1.4.21"
 httpx = {extras = ["http2"], version = "^0.18.2"}
 click = "^8.0.1"
 loguru = "^0.5.3"
+PyJWT = "^2.1.0"
 
 [tool.poetry.dev-dependencies]
 jupyter = "^1.0.0"
