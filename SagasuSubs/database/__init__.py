@@ -75,6 +75,17 @@ class FileCrud(CrudBase):
                     yield dto.FileRead.from_orm(entity)
         return
 
+    def count(self, begin: int = 0, end: int = 0):
+        session = self.session_factory()
+        with session.begin():
+            total = session.query(entities.File).count()
+            return (
+                session.query(entities.File)
+                .offset(begin)
+                .limit((end or total) - begin)
+                .count()
+            )
+
     def read_by_sha1(self, sha1: str) -> Optional[dto.FileRead]:
         session = self.session_factory()
         with session.begin():
@@ -107,9 +118,7 @@ class FileCrud(CrudBase):
         return self.iterate()
 
     def __len__(self):
-        session = self.session_factory()
-        with session.begin():
-            return session.query(entities.File).count()
+        return self.count()
 
 
 class DialogCrud(CrudBase):

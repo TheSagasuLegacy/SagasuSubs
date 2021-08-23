@@ -1,12 +1,13 @@
 import asyncio
 from pathlib import Path
-from typing import List, Optional
+from typing import Generator, List, Optional, cast
 
 import httpx
 import SagasuSubs.database as database
-from loguru import logger
 from SagasuSubs.database import dto
+from SagasuSubs.log import logger
 from SagasuSubs.utils import AdvanceSemaphore
+from tqdm import tqdm
 
 from . import models
 from .auth import AuthTokenManager
@@ -100,10 +101,20 @@ class UploadFiles:
     async def run(self, begin: int = 0, end: int = 0, parallel: int = 2):
         sem = AdvanceSemaphore(parallel)
 
-        for file in self.file_crud.iterate(begin, end):
-            await sem.acquire()
-            task = asyncio.create_task(self.upload_subtitles(file))
-            task.add_done_callback(lambda _: sem.release())
+        with tqdm(
+            iterable=self.file_crud.iterate(begin, end),
+            total=self.file_crud.count(begin, end),
+            colour="YELLOW",
+        ) as progress:
+            for file in progress:
+                file = cast(dto.FileRead, file)
+                progress.set_description(file.series_name)
 
-        await sem.wait_all_finish()
-        await self.client.aclose()
+                await sem.acquire()
+                task = asyncio.create_task(self.upload_subtitles(file))
+                task.add_done_callback(lambda _: sem.release())
+
+            await sem.wait_all_finish()
+            await self.client.aclose()
+
+        return
