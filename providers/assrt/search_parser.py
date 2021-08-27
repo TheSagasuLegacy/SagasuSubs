@@ -9,8 +9,7 @@ def inner_text(node) -> str:
 
 
 class AssrtSearchPage:
-    def __init__(self, keyword: str, page: int = 1, headers: Dict[str, Any] = None):
-        self.keyword, self.page = keyword, page
+    def __init__(self, headers: Dict[str, Any] = None):
         self.client = Client(
             http2=True, base_url="https://assrt.net/sub/", headers=headers
         )
@@ -36,17 +35,7 @@ class AssrtSearchPage:
             continue
         return
 
-    def spider(self):
-        for page in range(1, int(self.page) + 1):
-            response = self.client.get(
-                url="", params={"searchword": self.keyword, "page": page}
-            )
-            response.raise_for_status()
-            yield response.text
-
-
-if __name__ == "__main__":
-    for text in (instance := AssrtSearchPage("某科学的超电磁炮", 20)).spider():
-        iterator = instance.parse_page(text)
-        for title, link in iterator:
-            print(f"{title}: {link}")
+    def spider(self, keyword: str, page: int):
+        response = self.client.get(url="", params={"searchword": keyword, "page": page})
+        response.raise_for_status()
+        return response.text

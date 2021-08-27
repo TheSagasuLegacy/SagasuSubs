@@ -35,7 +35,7 @@ class AssrtDetailPage:
 
     def download(self, link: URL, path: Path):
         size = 0
-        with self.client.stream("GET", link) as stream:
+        with self.client.stream("GET", link, timeout=None) as stream:
             stream.raise_for_status()
             _, disposition = parse_header(stream.headers["content-disposition"])
             filename = unquote(
