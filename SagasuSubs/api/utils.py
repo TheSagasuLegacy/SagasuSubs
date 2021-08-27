@@ -5,6 +5,7 @@ import httpx
 from SagasuSubs.database import dto
 
 from .auth import AuthTokenManager
+from .models import ManySeriesGet
 
 
 class NotebookAPIUtils:
@@ -41,3 +42,16 @@ class NotebookAPIUtils:
             dto.EpisodeCreate.parse_obj({**episode, "series_id": series_id})
             for episode in data["episodes"]
         ]
+
+    def iterate_series(self, begin: int = 1, size: int = 50):
+        while True:
+            response = self.client.get(
+                "/api/series", params={"limit": size, "page": begin, "join": "episodes"}
+            )
+            response.raise_for_status()
+            model = ManySeriesGet.parse_obj(response.json())
+            yield model
+            if begin >= model.meta.totalPages:
+                break
+            begin += 1
+        return

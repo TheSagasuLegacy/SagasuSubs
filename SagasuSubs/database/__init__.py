@@ -253,6 +253,32 @@ class SeriesCrud(CrudBase):
             entity = session.query(entities.Series).get(id)
             return dto.SeriesRead.from_orm(entity) if entity else None
 
+    def iterate(self, begin: int = 0, end: int = 0, size: int = 20):
+        session = self.session_factory()
+        with session.begin():
+            for begin in range(
+                begin, end or session.query(entities.Series).count(), size
+            ):
+                for entity in (
+                    session.query(entities.Series)
+                    .order_by(entities.Series.id)
+                    .offset(begin)
+                    .limit(size)
+                ):
+                    yield dto.SeriesRead.from_orm(entity)
+        return
+
+    def count(self, begin: int = 0, end: int = 0):
+        session = self.session_factory()
+        with session.begin():
+            total = session.query(entities.Series).count()
+            return (
+                session.query(entities.Series)
+                .offset(begin)
+                .limit((end or total) - begin)
+                .count()
+            )
+
     def update(self, model: dto.SeriesRead) -> dto.SeriesRead:
         session = self.session_factory()
         with session.begin():
