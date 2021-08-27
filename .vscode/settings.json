@@ -9,9 +9,11 @@
         "source.fixAll": true
     },
     "cSpell.words": [
+        "Assrt",
         "Sagasu",
         "asyncio",
         "cchardet",
-        "httpx"
+        "httpx",
+        "lxml"
     ]
 }
