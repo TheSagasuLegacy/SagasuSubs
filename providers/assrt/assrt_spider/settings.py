@@ -1,4 +1,10 @@
+# flake8:noqa:E501
 from pathlib import Path
+
+import scrapy.utils.log
+from SagasuSubs.log import LoguruHandler
+
+scrapy.utils.log._get_handler = lambda *_, **__: LoguruHandler(LOG_LEVEL)
 
 # Scrapy settings for assrt_spider project
 #
@@ -14,10 +20,6 @@ BOT_NAME = "assrt_spider"
 SPIDER_MODULES = ["assrt_spider.spiders"]
 NEWSPIDER_MODULE = "assrt_spider.spiders"
 
-BGM_DATA_DIR = Path(__file__).parent.absolute().parent / "data"
-
-assert BGM_DATA_DIR.is_dir()
-
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:93.0) Gecko/20100101 Firefox/93.0"
 
@@ -25,7 +27,7 @@ USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:93.0) Gecko/20100101 Firefox/93
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 4
+CONCURRENT_REQUESTS = 2
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -39,13 +41,28 @@ CONCURRENT_REQUESTS = 4
 # COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
-# TELNETCONSOLE_ENABLED = False
+TELNETCONSOLE_ENABLED = False
+
 
 # Override the default request headers:
-# DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-# }
+DEFAULT_REQUEST_HEADERS = {
+    "Accept": (
+        "text/html,application/xhtml+xml,application/xml;"
+        "q=0.9,image/avif,image/webp,*/*;"
+        "q=0.8"
+    ),
+    "Accept-Language": ("zh-CN,zh-HK;" "q=0.7,en-US;" "q=0.3"),
+    "DNT": "1",
+    "Referer": "https://assrt.net",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1",
+    "Sec-GPC": "1",
+    "TE": "trailers",
+    "Upgrade-Insecure-Requests": "1",
+    "User-Agent": USER_AGENT,
+}
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
@@ -73,9 +90,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
-# AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-# AUTOTHROTTLE_START_DELAY = 5
+AUTOTHROTTLE_START_DELAY = 3
 # The maximum download delay to be set in case of high latencies
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
@@ -92,6 +109,15 @@ DOWNLOADER_MIDDLEWARES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
+LOG_LEVEL = "INFO"
+
 RETRY_ENABLED = True
 RETRY_TIMES = 5
-RETRY_HTTP_CODES = [*range(400, 1000)]
+RETRY_HTTP_CODES = range(210, 1000)
+RETRY_PRIORITY_ADJUST = 2
+
+CURRENT_DIR = Path(__file__).parent.absolute()
+BGM_DATA_DIR = CURRENT_DIR.parent / "data"
+DOWNLOAD_DIR = CURRENT_DIR.parent / "downloads"
+DOWNLOAD_DIR.mkdir(exist_ok=True)
+assert BGM_DATA_DIR.is_dir()
