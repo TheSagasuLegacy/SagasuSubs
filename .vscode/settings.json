@@ -15,5 +15,13 @@
         "cchardet",
         "httpx",
         "lxml"
-    ]
+    ],
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "./providers/assrt/data/**": true,
+        "./providers/assrt/downloads/**": true,
+        "./providers/sub_share/subtitles/**": true,
+    }
 }
