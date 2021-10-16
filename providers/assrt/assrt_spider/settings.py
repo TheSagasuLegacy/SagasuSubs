@@ -38,31 +38,10 @@ CONCURRENT_REQUESTS = 2
 # CONCURRENT_REQUESTS_PER_IP = 16
 
 # Disable cookies (enabled by default)
-# COOKIES_ENABLED = False
+COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
 TELNETCONSOLE_ENABLED = False
-
-
-# Override the default request headers:
-DEFAULT_REQUEST_HEADERS = {
-    "Accept": (
-        "text/html,application/xhtml+xml,application/xml;"
-        "q=0.9,image/avif,image/webp,*/*;"
-        "q=0.8"
-    ),
-    "Accept-Language": ("zh-CN,zh-HK;" "q=0.7,en-US;" "q=0.3"),
-    "DNT": "1",
-    "Referer": "https://assrt.net",
-    "Sec-Fetch-Dest": "document",
-    "Sec-Fetch-Mode": "navigate",
-    "Sec-Fetch-Site": "same-origin",
-    "Sec-Fetch-User": "?1",
-    "Sec-GPC": "1",
-    "TE": "trailers",
-    "Upgrade-Insecure-Requests": "1",
-    "User-Agent": USER_AGENT,
-}
 
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
@@ -73,7 +52,10 @@ DEFAULT_REQUEST_HEADERS = {
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
+    "scrapy.downloadermiddlewares.useragent.UserAgentMiddleware": None,
+    "assrt_spider.middlewares.RandomUserAgentMiddleware": 300,
     "scrapy.downloadermiddlewares.retry.RetryMiddleware": 543,
+    "scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware": 543,
 }
 
 # Enable or disable extensions
@@ -111,6 +93,8 @@ AUTOTHROTTLE_START_DELAY = 3
 
 LOG_LEVEL = "INFO"
 
+DOWNLOAD_TIMEOUT = 12
+
 RETRY_ENABLED = True
 RETRY_TIMES = 5
 RETRY_HTTP_CODES = range(210, 1000)
@@ -121,3 +105,13 @@ BGM_DATA_DIR = CURRENT_DIR.parent / "data"
 DOWNLOAD_DIR = CURRENT_DIR.parent / "downloads"
 DOWNLOAD_DIR.mkdir(exist_ok=True)
 assert BGM_DATA_DIR.is_dir()
+
+USER_AGENT_LIST = [
+    stripped_line
+    for line in (
+        (CURRENT_DIR / "user-agents.txt")
+        .read_text(encoding="utf-8")
+        .splitlines(keepends=False)
+    )
+    if (stripped_line := line.strip()) and not line.startswith("#")
+]

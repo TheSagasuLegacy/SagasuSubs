@@ -5,6 +5,7 @@ from difflib import SequenceMatcher
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TypedDict
 from urllib.parse import urljoin
+from uuid import uuid4
 
 import scrapy
 from assrt_spider import settings
@@ -78,15 +79,13 @@ class AssrtSearchSpider(scrapy.Spider):
                         "page": 1,
                         "sort": "relevance",
                         "no_muxer": 1,
-                        "utm_source": "search_nomuxer",
-                        "utm_medium": "smart",
-                        "utm_campaign": "subtitle",
                     },
                 )
                 yield Request(
                     url=str(url),
                     callback=self.parse,
                     cb_kwargs={"name": name, "id": id},
+                    cookies={"u3": uuid4().hex},
                 )
                 opened_ids.add(id)
         return
