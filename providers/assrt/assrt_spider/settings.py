@@ -27,7 +27,7 @@ USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:93.0) Gecko/20100101 Firefox/93
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 2
+CONCURRENT_REQUESTS = 8
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -66,20 +66,20 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-# ITEM_PIPELINES = {
-#    'assrt_spider.pipelines.AssrtSpiderPipeline': 300,
-# }
+ITEM_PIPELINES = {
+    "assrt_spider.pipelines.FileDownloadPipeline": 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 AUTOTHROTTLE_ENABLED = True
 # The initial download delay
-AUTOTHROTTLE_START_DELAY = 3
+AUTOTHROTTLE_START_DELAY = 2
 # The maximum download delay to be set in case of high latencies
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-# AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
+AUTOTHROTTLE_TARGET_CONCURRENCY = 4
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
@@ -97,7 +97,7 @@ DOWNLOAD_TIMEOUT = 12
 
 RETRY_ENABLED = True
 RETRY_TIMES = 5
-RETRY_HTTP_CODES = range(210, 1000)
+RETRY_HTTP_CODES = range(400, 600)
 RETRY_PRIORITY_ADJUST = 2
 
 CURRENT_DIR = Path(__file__).parent.absolute()
@@ -115,3 +115,6 @@ USER_AGENT_LIST = [
     )
     if (stripped_line := line.strip()) and not line.startswith("#")
 ]
+
+ARIA2_PORT = 16800
+ARIA2_SECRET = "mixision"
