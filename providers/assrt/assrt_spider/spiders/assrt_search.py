@@ -10,6 +10,7 @@ from uuid import uuid4
 import scrapy
 from assrt_spider import settings
 from httpx import URL
+from scrapy.downloadermiddlewares.retry import get_retry_request
 from scrapy.http import Request, TextResponse
 from scrapy.selector import Selector
 from tqdm import tqdm
@@ -27,10 +28,7 @@ class SearchResult(TypedDict):
 
 class AssrtSearchSpider(scrapy.Spider):
     name = "assrt_search"
-    target_urls = [
-        "http://assrt.net",
-        "http://2.assrt.net",
-    ]
+    target_urls = ["http://2.assrt.net", "http://assrt.net"]
     download_dir = settings.DOWNLOAD_DIR / "list"
 
     download_dir.mkdir(exist_ok=True, parents=True)
@@ -46,7 +44,7 @@ class AssrtSearchSpider(scrapy.Spider):
             if file.endswith(".json")
         ]
         opened_ids = set()
-        data_files.sort(key=lambda x: x.stat().st_atime, reverse=True)
+        data_files.sort(key=lambda x: x.stat().st_atime)
         with tqdm(data_files) as progress:
             for i, data_file in enumerate(progress):
                 data_file: Path
@@ -91,6 +89,12 @@ class AssrtSearchSpider(scrapy.Spider):
         return
 
     def parse(self, response: TextResponse, *, name: str, id: int):
+        if result_count := response.selector.css("#result-count").get():
+            self.logger.debug(f"Search page {result_count=}")
+        else:
+            return get_retry_request(
+                response.request, spider=self, reason="blank page returned"
+            )
         download_subjects: List[Selector] = [*response.selector.css(".introtitle")]
         subject_data: List[SearchResult] = []
         for subject in download_subjects:
