@@ -2,7 +2,7 @@ import json
 import os
 import random
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, TypedDict, cast
 from urllib.parse import unquote_plus
 from uuid import uuid4
 
@@ -29,8 +29,8 @@ class SearchList(TypedDict):
 class AssrtDownloadSpider(scrapy.Spider):
     name = "assrt_download"
     target_urls = [
-        "https://assrt.net",
-        "https://2.assrt.net",
+        "http://assrt.net",
+        "http://2.assrt.net",
     ]
     download_dir = settings.DOWNLOAD_DIR / "subtitle"
     subject_lists_dir = settings.DOWNLOAD_DIR / "list"
@@ -108,40 +108,48 @@ class AssrtDownloadSpider(scrapy.Spider):
         search_data: "SearchResult",
         subject_data: Dict[str, Any],
     ):
-
         main_title: Optional[str] = response.selector.css(".name_org").get()
-        detail_html: Optional[str] = response.selector.css("#detail-tbl-main").get()
-        download_btn: Selector = response.selector.css("#btn_download")  # type: ignore
+        detail_html = response.selector.css("#detail-tbl-main > div > div")
+        download_btn = response.selector.css("#btn_download")
 
         if (
             (main_title is None)
-            or (detail_html is None)
+            or (detail_html.getall() is None)
             or (download_btn.get() is None)
-            or ((download_path := download_btn.attrib.get("href")) is None)
+            or ((download_url_path := download_btn.attrib.get("href")) is None)
         ):
             self.logger.warning(f"{id=} {name=} failed to parse result page")
             return
 
-        download_url = URL(self.root_url, path=unquote_plus(download_path))
+        download_url = URL(self.root_url, path=unquote_plus(download_url_path))
         filename = os.path.basename(download_url.path)
-        basefilename, file_ext = filename.rsplit(".", 1)
+        basefilename, _ = os.path.splitext(filename)
+
+        details_text = ""
+        for detail_line in detail_html:
+            detail_line, detail_line_text = cast(Selector, detail_line), ""
+            for detail_span in detail_line.css("span[class^=subdes], span[class^=col]"):
+                detail_span = cast(Selector, detail_span)
+                detail_span_text: Optional[str] = detail_span.css("::text").get()
+                if (detail_span_text is not None) and (
+                    detail_span_text := detail_span_text.strip()
+                ):
+                    detail_line_text += detail_span_text + "\t"
+            details_text += detail_line_text.strip() + "\n"
+        details_text = details_text.strip()
 
         save_dir = self.download_dir / str(id)
         save_dir.mkdir(exist_ok=True, parents=True)
+        download_dir = save_dir / "downloads"
+        download_dir.mkdir(exist_ok=True, parents=True)
 
         with open(save_dir / "subject.json", "wt", encoding="utf-8") as f:
             json.dump(subject_data, f, ensure_ascii=False, indent=4)
 
-        with open(save_dir / (basefilename + ".html"), "wt", encoding="utf-8") as f:
-            f.write(detail_html)
+        with open(download_dir / (basefilename + ".txt"), "wt", encoding="utf-8") as f:
+            f.write(details_text)
 
-        if (download_path := save_dir / filename).is_file():
+        if (download_path := download_dir / filename).is_file():
             return
 
         yield DownloadItem(path=download_path, url=download_url)
-
-    def download(self, response: TextResponse, *, path: Path):
-        with open(path, "wb") as f:
-            writted = f.write(response.body)
-
-        self.logger.info(f"{writted} bytes written to {path.name=}")
