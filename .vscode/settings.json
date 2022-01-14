@@ -10,11 +10,12 @@
     },
     "cSpell.words": [
         "Assrt",
-        "Sagasu",
         "asyncio",
         "cchardet",
         "httpx",
-        "lxml"
+        "lxml",
+        "Sagasu",
+        "scrapy"
     ],
     "files.watcherExclude": {
         "**/.git/objects/**": true,
