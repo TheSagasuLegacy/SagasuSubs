@@ -1226,7 +1226,7 @@ idna2008 = ["idna"]
 
 [[package]]
 name = "scrapy"
-version = "2.5.0"
+version = "2.5.1"
 description = "A high-level Web Crawling and Web Scraping framework"
 category = "dev"
 optional = false
@@ -1555,7 +1555,7 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "69d17932fc3d0c5445cbab42742c684dcc4026afcd623098cc9ffb87450d97f5"
+content-hash = "e1e6fd8cc67b6dbbe2adfd712cce93124cc9d24171f0ae30890d9bf955a17eb9"
 
 [metadata.files]
 anyio = [
@@ -2412,8 +2412,8 @@ rfc3986 = [
     {file = "rfc3986-1.5.0.tar.gz", hash = "sha256:270aaf10d87d0d4e095063c65bf3ddbc6ee3d0b226328ce21e036f946e421835"},
 ]
 scrapy = [
-    {file = "Scrapy-2.5.0-py2.py3-none-any.whl", hash = "sha256:5f590fdc84b496e5a4bb5ef99836b0aa688a07cfcb4bc3bb7290f66486f27424"},
-    {file = "Scrapy-2.5.0.tar.gz", hash = "sha256:0a68ed41f7173679f160c4cef2db05288548c21e7164170552adae8b13cefaab"},
+    {file = "Scrapy-2.5.1-py2.py3-none-any.whl", hash = "sha256:1a9a36970004950ee3c519a14c4db945f9d9a63fecb3d593dddcda477331dde9"},
+    {file = "Scrapy-2.5.1.tar.gz", hash = "sha256:13af6032476ab4256158220e530411290b3b934dd602bb6dacacbf6d16141f49"},
 ]
 send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
