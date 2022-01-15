@@ -28,7 +28,7 @@ jupyter = "^1.0.0"
 mypy = "^0.910"
 black = "^21.6b0"
 flake8 = "^3.9.2"
-Scrapy = "^2.5.0"
+Scrapy = "^2.5.1"
 aria2p = "^0.11.1"
 
 [build-system]
