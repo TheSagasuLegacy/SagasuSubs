@@ -29,8 +29,8 @@ class SearchList(TypedDict):
 class AssrtDownloadSpider(scrapy.Spider):
     name = "assrt_download"
     target_urls = [
-        "http://assrt.net",
-        "http://2.assrt.net",
+        "https://assrt.net",
+        "https://2.assrt.net",
     ]
     download_dir = settings.DOWNLOAD_DIR / "subtitle"
     subject_lists_dir = settings.DOWNLOAD_DIR / "list"
