@@ -27,7 +27,7 @@ USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:93.0) Gecko/20100101 Firefox/93
 ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
-CONCURRENT_REQUESTS = 8
+CONCURRENT_REQUESTS = 2
 
 # Configure a delay for requests for the same website (default: 0)
 # See https://docs.scrapy.org/en/latest/topics/settings.html#download-delay
@@ -79,7 +79,7 @@ AUTOTHROTTLE_START_DELAY = 2
 # AUTOTHROTTLE_MAX_DELAY = 60
 # The average number of requests Scrapy should be sending in parallel to
 # each remote server
-AUTOTHROTTLE_TARGET_CONCURRENCY = 4
+AUTOTHROTTLE_TARGET_CONCURRENCY = 1
 # Enable showing throttling stats for every response received:
 # AUTOTHROTTLE_DEBUG = False
 
@@ -116,5 +116,8 @@ USER_AGENT_LIST = [
     if (stripped_line := line.strip()) and not line.startswith("#")
 ]
 
-ARIA2_PORT = 16800
-ARIA2_SECRET = "mixision"
+ARIA2_HOST = "http://127.0.0.1"
+ARIA2_PORT = 23333
+# ARIA2_SECRET = ""
+# ARIA2_TIMEOUT = 12
+ARIA2_CHECK_INTERVAL = 0.5
