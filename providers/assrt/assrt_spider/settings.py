@@ -103,8 +103,9 @@ RETRY_PRIORITY_ADJUST = 2
 CURRENT_DIR = Path(__file__).parent.absolute()
 BGM_DATA_DIR = CURRENT_DIR.parent / "data"
 DOWNLOAD_DIR = CURRENT_DIR.parent / "downloads"
-DOWNLOAD_DIR.mkdir(exist_ok=True)
 assert BGM_DATA_DIR.is_dir()
+
+DOWNLOAD_MIN_SIMILARITY = 0.1
 
 USER_AGENT_LIST = [
     stripped_line
@@ -113,7 +114,7 @@ USER_AGENT_LIST = [
         .read_text(encoding="utf-8")
         .splitlines(keepends=False)
     )
-    if (stripped_line := line.strip()) and not line.startswith("#")
+    if (stripped_line := line.strip()) and not stripped_line.startswith("#")
 ]
 
 ARIA2_HOST = "http://127.0.0.1"
