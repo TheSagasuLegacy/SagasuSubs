@@ -4,9 +4,7 @@ version = "0.1.0"
 description = "Subtitle processing scripts collection for project Sagasu."
 authors = ["Mix <32300164+mnixry@users.noreply.github.com>"]
 license = "GPL-3.0"
-packages = [
-    { include = "SagasuSubs" },
-]
+packages = [{ include = "SagasuSubs" }]
 
 [tool.poetry.scripts]
 SagasuSubs = 'SagasuSubs.api.__main__:main'
@@ -16,12 +14,13 @@ python = "^3.8"
 pydantic = "^1.8.2"
 pysubs2 = "^1.2.0"
 cchardet = "^2.1.7"
-SQLAlchemy = "^1.4.29"
-httpx = {extras = ["http2"], version = "^0.21.3"}
+httpx = { extras = ["http2"], version = "^0.21.3" }
 click = "^8.0.3"
 loguru = "^0.5.3"
 PyJWT = "^2.3.0"
 tqdm = "^4.62.3"
+blackcellmagic = "^0.0.3"
+sqlmodel = "^0.0.6"
 
 [tool.poetry.dev-dependencies]
 jupyter = "^1.0.0"
@@ -30,6 +29,7 @@ black = "^21.12b0"
 flake8 = "^3.9.2"
 Scrapy = "^2.5.1"
 aria2p = "^0.11.1"
+rarfile = "^4.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
