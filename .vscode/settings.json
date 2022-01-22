@@ -14,8 +14,10 @@
         "cchardet",
         "httpx",
         "lxml",
+        "rarfile",
         "Sagasu",
-        "scrapy"
+        "scrapy",
+        "tqdm"
     ],
     "files.watcherExclude": {
         "**/.git/objects/**": true,
