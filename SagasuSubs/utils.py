@@ -1,10 +1,20 @@
 import hashlib
 import os
-from asyncio import AbstractEventLoop, Semaphore, wait_for, Future
+from asyncio import AbstractEventLoop, Future, Semaphore, wait_for
 from pathlib import Path
-from typing import Iterator, Optional
+from typing import Callable, Iterator, Optional, TypeVar
 
 import cchardet
+
+T_Wrapped = TypeVar("T_Wrapped", bound=Callable)
+
+
+def overrides(InterfaceClass: object):
+    def overrider(func: T_Wrapped) -> T_Wrapped:
+        assert func.__name__ in dir(InterfaceClass), f"Error method: {func.__name__}"
+        return func
+
+    return overrider
 
 
 class AdvanceSemaphore(Semaphore):

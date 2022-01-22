@@ -1,18 +1,18 @@
 import abc
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import List, Optional
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlmodel import Session, create_engine
 
+from ..utils import overrides
 from . import dto, entities
 
 
 class CrudBase(metaclass=abc.ABCMeta):
     def __init__(self, db_path: Path, **engine_args):
-        self.db_uri = f"sqlite:///{db_path}"
-        self.engine = create_engine(self.db_uri, **engine_args)
-        self.session_factory: Callable[[], Session] = sessionmaker(bind=self.engine)
+        self.db_uri = db_path.as_uri().replace("file:", "sqlite:")
+        self.engine = create_engine(self.db_uri, future=True, **engine_args)
+        self.session_factory = lambda: Session(self.engine)
 
     @abc.abstractmethod
     def create_table(self):
@@ -41,15 +41,15 @@ class CrudBase(metaclass=abc.ABCMeta):
 
 class FileCrud(CrudBase):
     def create_table(self):
-        entities.File.__table__.create(bind=self.engine)
+        entities.Files.metadata.create_all(bind=self.engine)
 
     def drop_table(self):
-        entities.File.__table__.drop(bind=self.engine)
+        entities.Files.metadata.drop_all(bind=self.engine)
 
     def create(self, model: dto.FileCreate) -> dto.FileRead:  # type:ignore
         session = self.session_factory()
         with session.begin():
-            entity = entities.File(**model.dict())
+            entity = entities.Files(**model.dict())
             session.add(entity)
             session.commit()
             session.flush()
@@ -59,7 +59,7 @@ class FileCrud(CrudBase):
     def read(self, id: int) -> Optional[dto.FileRead]:
         session = self.session_factory()
         with session.begin():
-            entity = session.query(entities.File).get(id)
+            entity = session.query(entities.Files).get(id)
             return dto.FileRead.from_orm(entity) if entity else None
 
     def iterate(self, begin: int = 0, end: int = 0, size: int = 20):
@@ -67,8 +67,8 @@ class FileCrud(CrudBase):
         with session.begin():
             for begin in range(begin, end or len(self), size):
                 for entity in (
-                    session.query(entities.File)
-                    .order_by(entities.File.id)
+                    session.query(entities.Files)
+                    .order_by(entities.Files.id)
                     .offset(begin)
                     .limit(size)
                 ):
@@ -78,9 +78,9 @@ class FileCrud(CrudBase):
     def count(self, begin: int = 0, end: int = 0):
         session = self.session_factory()
         with session.begin():
-            total = session.query(entities.File).count()
+            total = session.query(entities.Files).count()
             return (
-                session.query(entities.File)
+                session.query(entities.Files)
                 .offset(begin)
                 .limit((end or total) - begin)
                 .count()
@@ -90,14 +90,17 @@ class FileCrud(CrudBase):
         session = self.session_factory()
         with session.begin():
             entity = (
-                session.query(entities.File).filter(entities.File.sha1 == sha1).first()
+                session.query(entities.Files)
+                .filter(entities.Files.sha1 == sha1)
+                .first()
             )
             return dto.FileRead.from_orm(entity) if entity else None
 
+    @overrides(CrudBase)
     def update(self, model: dto.FileRead) -> dto.FileRead:
         session = self.session_factory()
         with session.begin():
-            entity = entities.File(**model.dict(exclude={"dialogs"}))
+            entity = entities.Files(**model.dict(exclude={"dialogs"}))
             session.merge(entity)
             session.commit()
             session.flush()
@@ -107,7 +110,7 @@ class FileCrud(CrudBase):
     def delete(self, id: int):
         session = self.session_factory()
         with session.begin():
-            entity = session.query(entities.File).get(id)
+            entity = session.query(entities.Files).get(id)
             if entity is not None:
                 session.delete(entity)
             session.commit()
@@ -127,11 +130,12 @@ class DialogCrud(CrudBase):
     """
 
     def create_table(self):
-        entities.Dialogs.__table__.create(bind=self.engine)
+        entities.Dialogs.metadata.create_all(bind=self.engine)
 
     def drop_table(self):
-        entities.Dialogs.__table__.drop(bind=self.engine)
+        entities.Dialogs.metadata.drop_all(bind=self.engine)
 
+    @overrides(CrudBase)
     def create(self, model: dto.DialogCreate) -> dto.DialogRead:
         session = self.session_factory()
         with session.begin():
@@ -157,6 +161,7 @@ class DialogCrud(CrudBase):
             entity = session.query(entities.Dialogs).get(id)
             return dto.DialogRead.from_orm(entity) if entity else None
 
+    @overrides(CrudBase)
     def update(self, model: dto.DialogRead) -> dto.DialogRead:
         session = self.session_factory()
         with session.begin():
@@ -184,11 +189,12 @@ class EpisodeCrud(CrudBase):
     """
 
     def create_table(self):
-        entities.Episode.__table__.create(bind=self.engine)
+        entities.Episode.metadata.create_all(bind=self.engine)
 
     def drop_table(self):
-        entities.Episode.__table__.drop(bind=self.engine)
+        entities.Episode.metadata.drop_all(bind=self.engine)
 
+    @overrides(CrudBase)
     def create(self, model: dto.EpisodeCreate) -> dto.EpisodeRead:
         session = self.session_factory()
         with session.begin():
@@ -205,6 +211,7 @@ class EpisodeCrud(CrudBase):
             entity = session.query(entities.Episode).get(id)
             return dto.EpisodeRead.from_orm(entity) if entity else None
 
+    @overrides(CrudBase)
     def update(self, model: dto.EpisodeRead) -> dto.EpisodeRead:
         session = self.session_factory()
         with session.begin():
@@ -232,11 +239,12 @@ class SeriesCrud(CrudBase):
     """
 
     def create_table(self):
-        entities.Series.__table__.create(bind=self.engine)
+        entities.Series.metadata.create_all(bind=self.engine)
 
     def drop_table(self):
-        entities.Series.__table__.drop(bind=self.engine)
+        entities.Series.metadata.drop_all(bind=self.engine)
 
+    @overrides(CrudBase)
     def create(self, model: dto.SeriesCreate) -> dto.SeriesRead:
         session = self.session_factory()
         with session.begin():
@@ -279,6 +287,7 @@ class SeriesCrud(CrudBase):
                 .count()
             )
 
+    @overrides(CrudBase)
     def update(self, model: dto.SeriesRead) -> dto.SeriesRead:
         session = self.session_factory()
         with session.begin():

@@ -1,52 +1,52 @@
-from sqlalchemy import Column, Float, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm.decl_api import declarative_base
+from __future__ import annotations
 
-Base = declarative_base()
+from typing import List, Optional
 
-
-class Dialogs(Base):
-    __tablename__ = "dialogs"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    content = Column(String, nullable=False)
-    begin = Column(Integer, nullable=False)
-    end = Column(Integer, nullable=False)
-
-    file_id = Column(Integer, ForeignKey("files.id"), nullable=False, index=True)
-
-    file = relationship("File", back_populates="dialogs")
+from sqlmodel import Field, Relationship, SQLModel
 
 
-class Episode(Base):
-    __tablename__ = "episode"
-    id = Column(Integer, primary_key=True)
-    name = Column(String)
-    sort = Column(Float, nullable=False)
-    type = Column(Integer, nullable=False)
+class Dialogs(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    content: str
+    begin: int
+    end: int
 
-    series_id = Column(Integer, ForeignKey("series.id"), nullable=False, index=True)
-
-    series = relationship("Series", back_populates="episodes")
+    file_id: int = Field(foreign_key="files.id", index=True)
+    file: Files = Relationship(back_populates="dialogs")
 
 
-class Series(Base):
-    __tablename__ = "series"
-    id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+class Episode(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    name: Optional[str] = None
+    sort: float
+    type: int
 
-    episodes = relationship(Episode, back_populates="series")
+    series_id: int = Field(foreign_key="series.id", index=True)
+    series: Series = Relationship(back_populates="episodes")
 
 
-class File(Base):
-    __tablename__ = "files"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    filename = Column(String(1024), index=True, nullable=False)
-    sha1 = Column(String(40), index=True, nullable=False, unique=True)
-    path = Column(String, nullable=False)
+class Series(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    name: str
 
-    series_name = Column(String)
-    series_id = Column(Integer, ForeignKey("series.id"), index=True)
-    episode_name = Column(String)
-    episode_id = Column(Integer, ForeignKey("episode.id"), index=True)
+    episodes: List[Episode] = Relationship(back_populates="series")
 
-    dialogs = relationship(Dialogs, back_populates="file")
+
+class Files(SQLModel, table=True):
+    id: int = Field(primary_key=True)
+    name: str = Field(max_length=1024)
+    sha1: str = Field(max_length=40)
+    path: str
+
+    series_name: str
+    series_id: Optional[int] = Field(None, foreign_key="series.id", index=True)
+    episode_name: str
+    episode_id: Optional[int] = Field(None, foreign_key="episode.id", index=True)
+
+    dialogs: List[Dialogs] = Relationship(back_populates="file")
+
+
+Dialogs.update_forward_refs()
+Episode.update_forward_refs()
+Series.update_forward_refs()
+Files.update_forward_refs()
