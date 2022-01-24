@@ -1,13 +1,14 @@
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
+from scrapy import Spider
 
-
-# useful for handling different item types with a single interface
-from itemadapter import ItemAdapter
+from .items import BangumiSubject
+from .settings import BGM_DATA_DIR
 
 
 class BangumiPipeline:
-    def process_item(self, item, spider):
-        return item
+    def process_item(self, item: BangumiSubject, spider: Spider):
+        json_data = item.json(ensure_ascii=False, indent=4)
+        storage_dir = BGM_DATA_DIR / f"{item.id}.json"
+        size = storage_dir.write_text(json_data, encoding="utf-8")
+        spider.logger.debug(
+            f"Subject {item.name_cn or item.name!r} are stored, {size=} bytes"
+        )
