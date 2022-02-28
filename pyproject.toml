@@ -18,7 +18,7 @@ httpx = { extras = ["http2"], version = "^0.21.3" }
 click = "^8.0.3"
 loguru = "^0.5.3"
 PyJWT = "^2.3.0"
-tqdm = "^4.62.3"
+tqdm = "^4.63.0"
 blackcellmagic = "^0.0.3"
 sqlmodel = "^0.0.6"
 
